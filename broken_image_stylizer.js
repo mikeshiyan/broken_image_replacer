@@ -2,11 +2,19 @@
  * @file
  * Stylizes broken images with unobtrusive placeholder.
  *
- * @author Mike Shiyan
+ * This file can be used as a Tampermonkey userscript or it can be included in
+ * the source of any website.
  */
 
 // ==UserScript==
-// @name Broken Image Stylizer
+// @name         Broken Image Stylizer
+// @version      0.0.1
+// @license      MIT
+// @description  Stylizes broken images with unobtrusive placeholder.
+// @author       Mike Shiyan
+// @namespace    Mike Shiyan
+// @source       https://github.com/mikeshiyan/broken_image_stylizer
+// @supportURL   https://github.com/mikeshiyan/broken_image_stylizer/issues
 // ==/UserScript==
 
 (function () {
