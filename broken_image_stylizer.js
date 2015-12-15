@@ -1,19 +1,19 @@
 /**
  * @file
- * Replaces broken images with dummy image.
+ * Stylizes broken images with unobtrusive placeholder.
  *
  * @author Mike Shiyan
  */
 
 // ==UserScript==
-// @name Broken Image Replacer
+// @name Broken Image Stylizer
 // ==/UserScript==
 
 (function () {
 
   'use strict';
 
-  function fix (image) {
+  function stylize (image) {
     var width  = image.width;
     var height = image.height;
     var text   = width + ' × ' + height;
@@ -45,7 +45,7 @@
       // Check that image is not processed yet.
       if (!this.classList.contains('broken-image')) {
         cache[this.src] = 1;
-        fix(this);
+        stylize(this);
       }
 
       this.onerror = null;
@@ -59,19 +59,19 @@
     if (typeof localStorage != 'undefined') {
       $(document).ready(function ($) {
         // Change image sources without waiting for images attempting to load.
-        var data = JSON.parse(localStorage.getItem('broken_image_replacer')) || {};
+        var data = JSON.parse(localStorage.getItem('broken_images')) || {};
 
         $('img[src]').each(function () {
           if (data[$(this).attr('src')]) {
-            fix(this);
+            stylize(this);
           }
         });
       });
 
       var updateStorage = function () {
-        var data = JSON.parse(localStorage.getItem('broken_image_replacer')) || {};
+        var data = JSON.parse(localStorage.getItem('broken_images')) || {};
         $.extend(data, cache);
-        localStorage.setItem('broken_image_replacer', JSON.stringify(data));
+        localStorage.setItem('broken_images', JSON.stringify(data));
       };
 
       if (typeof $(window).on == 'function') {
@@ -84,7 +84,7 @@
 
     $(window).resize(function () {
       $('img.broken-image').each(function () {
-        fix(this);
+        stylize(this);
       });
     });
   }
