@@ -8,7 +8,7 @@
 
 // ==UserScript==
 // @name         Broken Image Stylizer
-// @version      0.0.2
+// @version      0.0.3
 // @license      MIT
 // @description  Stylizes broken images with unobtrusive placeholder.
 // @author       Mike Shiyan
