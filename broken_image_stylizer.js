@@ -45,11 +45,21 @@
     image.classList.add('broken-image');
   }
 
+  // iterateImages(function (image, i) {}, function (image) { return true; });
+  function iterateImages (handler, filter) {
+    var images = document.getElementsByTagName('img');
+
+    if (typeof filter != 'undefined') {
+      images = Array.prototype.filter.call(images, filter);
+    }
+
+    Array.prototype.forEach.call(images, handler);
+  }
+
   var cache = {};
 
-  var images = document.getElementsByTagName('img');
-  for (var i = 0, total = images.length; i < total; i++) {
-    images[i].onerror = function () {
+  iterateImages(function (image) {
+    image.onerror = function () {
       // Check that image is not processed yet.
       if (!this.classList.contains('broken-image')) {
         cache[this.src] = 1;
@@ -58,43 +68,40 @@
 
       this.onerror = null;
     };
-  }
+  });
 
-  if (typeof jQuery != 'undefined') {
-    // Currently only sites having jQuery are supported for certain operations.
-    var $ = jQuery;
+  if (typeof localStorage != 'undefined') {
+    var onDocumentReady = function () {
+      // Change image sources without waiting for images attempting to load.
+      var data = JSON.parse(localStorage.getItem('broken_images')) || {};
 
-    if (typeof localStorage != 'undefined') {
-      $(document).ready(function ($) {
-        // Change image sources without waiting for images attempting to load.
-        var data = JSON.parse(localStorage.getItem('broken_images')) || {};
-
-        $('img[src]').each(function () {
-          if (data[$(this).attr('src')]) {
-            stylize(this);
-          }
-        });
+      iterateImages(stylize, function (image) {
+        // Check that image element has the source and that this source is
+        // already known as broken. Use getAttribute() method to get initial
+        // property value because the direct object property (image.src) always
+        // contains string - the full path to source or an empty "".
+        return image.getAttribute('src') !== null && !!data[image.src];
       });
+    };
 
-      var updateStorage = function () {
-        var data = JSON.parse(localStorage.getItem('broken_images')) || {};
-        $.extend(data, cache);
-        localStorage.setItem('broken_images', JSON.stringify(data));
-      };
-
-      if (typeof $(window).on == 'function') {
-        $(window).on('load', updateStorage);
-      }
-      else {
-        $(window).load(updateStorage);
-      }
+    if (document.readyState != 'loading') {
+      onDocumentReady();
+    }
+    else {
+      document.addEventListener('DOMContentLoaded', onDocumentReady);
     }
 
-    $(window).resize(function () {
-      $('img.broken-image').each(function () {
-        stylize(this);
-      });
+    window.addEventListener('load', function () {
+      var data = JSON.parse(localStorage.getItem('broken_images')) || {};
+      Object.assign(data, cache);
+      localStorage.setItem('broken_images', JSON.stringify(data));
     });
   }
+
+  window.addEventListener('resize', function () {
+    iterateImages(stylize, function (image) {
+      return image.classList.contains('broken-image');
+    });
+  });
 
 })();
