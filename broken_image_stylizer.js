@@ -21,6 +21,12 @@
 
   'use strict';
 
+  /**
+   * Stylizes the image.
+   *
+   * @param image
+   *   Image element.
+   */
   function stylize (image) {
     var width  = image.width;
     var height = image.height;
@@ -35,7 +41,7 @@
     image.src = null;
     image.removeAttribute('src');
 
-    // Apply CSS.
+    // Apply styles.
     image.style.backgroundImage = 'url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAE0lEQVR42mNgAIIzZ878hxBAAAA8bwbHJ1VugQAAAABJRU5ErkJggg==")';
     image.style.fontFamily = 'monospace';
     image.style.fontSize = fontSize + 'px';
@@ -45,7 +51,17 @@
     image.classList.add('broken-image');
   }
 
-  // iterateImages(function (image, i) {}, function (image) { return true; });
+  /**
+   * Iterates over images in document.
+   *
+   * @param handler
+   *   A callback to run on each image. Accepts 2 arguments: image element and
+   *   index number of element in array.
+   * @param filter
+   *   (optional) A callback to filter images array. Accepts 1 argument: an
+   *   image element. Must return TRUE indicating the image should be in
+   *   resulting array, or FALSE to skip it.
+   */
   function iterateImages (handler, filter) {
     var images = document.getElementsByTagName('img');
 
@@ -71,8 +87,11 @@
   });
 
   if (typeof localStorage != 'undefined') {
+
+    /**
+     * Changes image sources without waiting for images attempting to load.
+     */
     var onDocumentReady = function () {
-      // Change image sources without waiting for images attempting to load.
       var data = JSON.parse(localStorage.getItem('broken_images')) || {};
 
       iterateImages(stylize, function (image) {
