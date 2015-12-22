@@ -106,24 +106,25 @@
 
   var cache = {};
 
-  iterateImages(function (image) {
-    image.onerror = function () {
-      // Check that image is not processed yet.
-      if (!this.classList.contains('broken-image')) {
-        cache[this.src] = 1;
-        stylize(this);
-      }
-
-      this.onerror = null;
-    };
-  });
-
   /**
-   * Changes image sources without waiting for images attempting to load.
+   * Executes the code after HTML of the page is fully loaded.
    */
   var onDocumentReady = function () {
-    var data = storageGet();
+    // Set onError handler for all images.
+    iterateImages(function (image) {
+      image.onerror = function () {
+        // Check that image is not processed yet.
+        if (!this.classList.contains('broken-image')) {
+          cache[this.src] = 1;
+          stylize(this);
+        }
 
+        this.onerror = null;
+      };
+    });
+
+    // Change image sources without waiting for images attempting to load.
+    var data = storageGet();
     iterateImages(stylize, function (image) {
       // Check that image element has the source and that this source is
       // already known as broken. Use getAttribute() method to get initial
