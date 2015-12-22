@@ -72,6 +72,38 @@
     Array.prototype.forEach.call(images, handler);
   }
 
+  /**
+   * Gets the list of broken images from the storage.
+   *
+   * @return
+   *   Object which keys are image source URLs.
+   */
+  function storageGet () {
+    var data;
+
+    if (typeof localStorage != 'undefined') {
+      data = JSON.parse(localStorage.getItem('broken_images'));
+    }
+
+    if (!data) {
+      data = {};
+    }
+
+    return data;
+  }
+
+  /**
+   * Stores a list of broken images.
+   *
+   * @param data
+   *   Object to store.
+   */
+  function storageSet (data) {
+    if (typeof localStorage != 'undefined') {
+      localStorage.setItem('broken_images', JSON.stringify(data));
+    }
+  }
+
   var cache = {};
 
   iterateImages(function (image) {
@@ -86,36 +118,33 @@
     };
   });
 
-  if (typeof localStorage != 'undefined') {
+  /**
+   * Changes image sources without waiting for images attempting to load.
+   */
+  var onDocumentReady = function () {
+    var data = storageGet();
 
-    /**
-     * Changes image sources without waiting for images attempting to load.
-     */
-    var onDocumentReady = function () {
-      var data = JSON.parse(localStorage.getItem('broken_images')) || {};
-
-      iterateImages(stylize, function (image) {
-        // Check that image element has the source and that this source is
-        // already known as broken. Use getAttribute() method to get initial
-        // property value because the direct object property (image.src) always
-        // contains string - the full path to source or an empty "".
-        return image.getAttribute('src') !== null && !!data[image.src];
-      });
-    };
-
-    if (document.readyState != 'loading') {
-      onDocumentReady();
-    }
-    else {
-      document.addEventListener('DOMContentLoaded', onDocumentReady);
-    }
-
-    window.addEventListener('load', function () {
-      var data = JSON.parse(localStorage.getItem('broken_images')) || {};
-      Object.assign(data, cache);
-      localStorage.setItem('broken_images', JSON.stringify(data));
+    iterateImages(stylize, function (image) {
+      // Check that image element has the source and that this source is
+      // already known as broken. Use getAttribute() method to get initial
+      // property value because the direct object property (image.src) always
+      // contains string - the full path to source or an empty "".
+      return image.getAttribute('src') !== null && !!data[image.src];
     });
+  };
+
+  if (document.readyState != 'loading') {
+    onDocumentReady();
   }
+  else {
+    document.addEventListener('DOMContentLoaded', onDocumentReady);
+  }
+
+  window.addEventListener('load', function () {
+    var data = storageGet();
+    Object.assign(data, cache);
+    storageSet(data);
+  });
 
   window.addEventListener('resize', function () {
     iterateImages(stylize, function (image) {
